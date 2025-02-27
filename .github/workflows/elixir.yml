@@ -43,6 +43,12 @@ jobs:
 
       - name: Check code formatting
         run: mix format --check-formatted
+
+      - name: Run credo (Static Code Analysis)
+        run: mix credo
+
+      - name: Run Dialyzer (Type Checking)
+        run: mix dialyzer
         
       - name: Run tests
         run: mix test
