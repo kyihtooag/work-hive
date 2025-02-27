@@ -1,4 +1,7 @@
 defmodule WorkHive.Task do
+  alias WorkHiveWeb.Errors.InvalidJsonError
+  alias WorkHiveWeb.Errors.CircularDependencyError
+
   defstruct name: "",
             command: "",
             requires: []
@@ -10,13 +13,20 @@ defmodule WorkHive.Task do
         }
 
   @spec from_map(map()) :: __MODULE__.t()
-  def from_map(task) do
+  def from_map(%{"name" => name, "command" => command} = task) do
     %__MODULE__{
-      name: task["name"],
-      command: task["command"],
+      name: name,
+      command: command,
       requires: Map.get(task, "requires", [])
     }
   end
+
+  def from_map(error_task),
+    do:
+      raise(InvalidJsonError,
+        message:
+          "Invalid task format: A task must have a name and a command. #{inspect(error_task)}."
+      )
 
   # sort by requires step, the task without requires step will be executed first
   def sort_tasks_order(tasks) do
@@ -42,7 +52,9 @@ defmodule WorkHive.Task do
         [task | sorted_tasks_list]
 
       !is_nil(parent_task_name) and parent_task_name in task.requires ->
-        raise "Circular dependency detected: between #{inspect(parent_task_name)} and #{inspect(task.name)}."
+        raise CircularDependencyError,
+          message:
+            "Circular dependency detected: between #{inspect(parent_task_name)} and #{inspect(task.name)}."
 
       true ->
         resolved_tasks_list =
