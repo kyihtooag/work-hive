@@ -1,6 +1,6 @@
 defmodule WorkHiveWeb.TaskJSON do
-  def index(%{tasks: tasks}) do
-    %{data: for(task <- tasks, do: data(task))}
+  def sort(%{sorted_tasks: sorted_tasks}) do
+    %{data: for(task <- sorted_tasks, do: data(task))}
   end
 
   defp data(task) do

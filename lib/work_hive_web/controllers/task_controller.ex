@@ -1,18 +1,14 @@
 defmodule WorkHiveWeb.TaskController do
   use WorkHiveWeb, :controller
 
-  def index(conn, _params) do
-    dummy_tasks_list = [
-      %{
-        name: "Task 1",
-        command: "echo 'Task 1'"
-      },
-      %{
-        name: "Task 2",
-        command: "echo 'Task 2'"
-      }
-    ]
+  alias WorkHive.Task
 
-    render(conn, :index, tasks: dummy_tasks_list)
+  def sort(conn, %{"tasks" => tasks}) do
+    sorted_tasks =
+      tasks
+      |> Enum.map(&Task.from_map/1)
+      |> Task.sort_tasks_order()
+
+    render(conn, :sort, sorted_tasks: sorted_tasks)
   end
 end

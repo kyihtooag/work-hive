@@ -8,6 +8,6 @@ defmodule WorkHiveWeb.Router do
   scope "/api", WorkHiveWeb do
     pipe_through :api
 
-    get "/tasks", TaskController, :index
+    post "/tasks", TaskController, :sort
   end
 end
