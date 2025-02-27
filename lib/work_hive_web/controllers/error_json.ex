@@ -26,6 +26,15 @@ defmodule WorkHiveWeb.ErrorJSON do
     %{error: message}
   end
 
+  def render("400.json", _assigns) do
+    %{
+      errors: %{
+        detail:
+          "Bad Request. Please check the header 'Content-Type: application/json' is set and the request body is a valid JSON."
+      }
+    }
+  end
+
   def render(template, _assigns) do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end

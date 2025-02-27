@@ -29,9 +29,7 @@ defmodule WorkHive.Task do
       )
 
   # sort by requires step, the task without requires step will be executed first
-  def sort_tasks_order(tasks) do
-    resolve_tasks(tasks)
-  end
+  def sort_tasks_order(tasks), do: resolve_tasks(tasks)
 
   defp resolve_tasks(tasks, sorted_tasks_list \\ []) do
     Enum.reduce(tasks, sorted_tasks_list, fn task, acc ->
@@ -48,8 +46,8 @@ defmodule WorkHive.Task do
       task in sorted_tasks_list ->
         sorted_tasks_list
 
-      Map.get(task, :requires, []) == [] ->
-        [task | sorted_tasks_list]
+      task.requires == [] ->
+        sorted_tasks_list ++ [task]
 
       !is_nil(parent_task_name) and parent_task_name in task.requires ->
         raise CircularDependencyError,

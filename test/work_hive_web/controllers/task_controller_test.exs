@@ -20,6 +20,18 @@ defmodule WorkHiveWeb.TaskControllerTest do
            }
   end
 
+  test "returns sorted tasks and bash scripts as a text response if the 'format' param is set to 'bash'",
+       %{conn: conn} do
+    valid_tasks = [
+      %{"name" => "task1", "command" => "command1", requires: ["task2"]},
+      %{"name" => "task2", "command" => "command2"}
+    ]
+
+    conn = post(conn, ~p"/api/tasks?format=bash", tasks: valid_tasks)
+
+    assert text_response(conn, 200) == "#!/usr/bin/env bash\n\ncommand2\ncommand1\n"
+  end
+
   test "raise InvalidJsonError if the task format is not valid", %{conn: conn} do
     invalid_tasks = [
       %{"name" => "task1", "command" => "command1"},
