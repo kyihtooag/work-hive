@@ -51,6 +51,10 @@ jobs:
     environment: production
 
     steps:
+      - name: Set Image Tag
+        id: vars
+        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
