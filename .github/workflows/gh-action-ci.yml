@@ -1,7 +1,6 @@
 # This workflow is triggered upon the pushing of a new commit or merging a branch to the main branch. 
 # OR creating a pull request to the main branch.
-# It runs tests, checks code formatting, performs static analysis, 
-# and ensures the project compiles without warnings.
+# It runs tests, checks code formatting, and ensures the project compiles without warnings.
 
 name: Work Hive CI
 
