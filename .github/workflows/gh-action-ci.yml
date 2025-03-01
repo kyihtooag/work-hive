@@ -45,7 +45,7 @@ jobs:
         run: mix format --check-formatted
 
       - name: Run credo (Static Code Analysis)
-        run: mix credo
+        run: mix credo --strict
 
       - name: Run Dialyzer (Type Checking)
         run: mix dialyzer

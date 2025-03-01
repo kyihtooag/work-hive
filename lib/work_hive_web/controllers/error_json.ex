@@ -29,8 +29,7 @@ defmodule WorkHiveWeb.ErrorJSON do
   def render("400.json", _assigns) do
     %{
       errors: %{
-        detail:
-          "Bad Request. Please check the header 'Content-Type: application/json' is set and the request body is a valid JSON."
+        detail: "Bad Request. Invalid request body. Expected 'tasks' key."
       }
     }
   end

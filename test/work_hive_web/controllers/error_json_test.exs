@@ -19,8 +19,7 @@ defmodule WorkHiveWeb.ErrorJSONTest do
   test "renders default 400" do
     assert WorkHiveWeb.ErrorJSON.render("400.json", %{}) == %{
              errors: %{
-               detail:
-                 "Bad Request. Please check the header 'Content-Type: application/json' is set and the request body is a valid JSON."
+               detail: "Bad Request. Invalid request body. Expected 'tasks' key."
              }
            }
   end
