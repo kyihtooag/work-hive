@@ -1,6 +1,9 @@
 # WorkHive
 
-A contrived HTTP job processing service
+A contrived HTTP job processing service. Demo Enpoint - 
+```bash
+http://3.12.164.174:4000/api/tasks
+```
 
 ### Agenda
 
