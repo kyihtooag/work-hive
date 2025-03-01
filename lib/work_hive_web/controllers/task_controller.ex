@@ -23,10 +23,7 @@ defmodule WorkHiveWeb.TaskController do
     header = "#!/usr/bin/env bash\n\n"
 
     # Join the commands with a newline
-    script =
-      sorted_tasks
-      |> Enum.map(& &1.command)
-      |> Enum.join("\n")
+    script = Enum.map_join(sorted_tasks, "\n", & &1.command)
 
     # Combine the header with the script
     header <> script

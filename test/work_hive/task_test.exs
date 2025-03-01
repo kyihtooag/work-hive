@@ -40,6 +40,13 @@ defmodule WorkHive.TaskTest do
   end
 
   describe "sort_tasks_order/1" do
+    test "empty list of tasks returns an empty list" do
+      tasks = []
+      sorted_tasks = Task.sort_tasks_order(tasks)
+
+      assert sorted_tasks == []
+    end
+
     test "sorts tasks correctly when there are no dependencies" do
       task1 = %Task{name: "task1", command: "echo hello", requires: []}
       task2 = %Task{name: "task2", command: "echo world", requires: []}
@@ -61,10 +68,11 @@ defmodule WorkHive.TaskTest do
     end
 
     test "raises CircularDependencyError when a circular dependency is detected" do
-      task1 = %Task{name: "task1", command: "echo hello", requires: ["task2"]}
-      task2 = %Task{name: "task2", command: "echo world", requires: ["task1"]}
+      task1 = %Task{name: "task1", command: "echo hello task-1", requires: ["task2"]}
+      task2 = %Task{name: "task2", command: "echo hello task-2", requires: ["task3"]}
+      task3 = %Task{name: "task3", command: "echo hello task-3", requires: ["task1"]}
 
-      tasks = [task1, task2]
+      tasks = [task1, task2, task3]
 
       assert_raise CircularDependencyError, fn ->
         Task.sort_tasks_order(tasks)

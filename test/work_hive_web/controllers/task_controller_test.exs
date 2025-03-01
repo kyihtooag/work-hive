@@ -29,7 +29,7 @@ defmodule WorkHiveWeb.TaskControllerTest do
 
     conn = post(conn, ~p"/api/tasks?format=bash", tasks: valid_tasks)
 
-    assert text_response(conn, 200) == "#!/usr/bin/env bash\n\ncommand2\ncommand1\n"
+    assert text_response(conn, 200) == "#!/usr/bin/env bash\n\ncommand2\ncommand1"
   end
 
   test "raise InvalidJsonError if the task format is not valid", %{conn: conn} do

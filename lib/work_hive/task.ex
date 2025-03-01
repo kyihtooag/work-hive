@@ -104,43 +104,107 @@ defmodule WorkHive.Task do
       ** (CircularDependencyError) Circular dependency detected: between "task1" and "task2".
   """
   @spec sort_tasks_order(list(__MODULE__.t())) :: list(__MODULE__.t())
-  def sort_tasks_order(tasks), do: resolve_tasks(tasks)
+  def sort_tasks_order([]), do: []
 
-  defp resolve_tasks(tasks, sorted_tasks_list \\ []) do
-    Enum.reduce(tasks, sorted_tasks_list, fn task, acc ->
-      if task.name in acc do
-        acc
-      else
-        resolve_dependencies(tasks, task, acc)
-      end
-    end)
+  def sort_tasks_order(tasks) do
+    # Create a map of tasks for efficient lookup
+    tasks_map = Enum.into(tasks, %{}, fn task -> {task.name, task} end)
+    do_sort_tasks_order(tasks, tasks_map)
   end
 
-  defp resolve_dependencies(tasks_list, task, sorted_tasks_list, parent_task_name \\ nil) do
-    cond do
-      task in sorted_tasks_list ->
+  # Resolve the tasks based on their dependencies
+  # If the task is already sorted, skip it
+  # If the task has dependencies, resolve them first
+  # tasks - List of tasks to resolve
+  # tasks_map - Map of tasks for efficient lookup
+  # processing_stack - List of tasks being processed to detect circular dependencies
+  # sorted_tasks_list - List of tasks that are already sorted
+  defp do_sort_tasks_order(tasks, tasks_map, processing_stack \\ [], sorted_tasks_list \\ []) do
+    Enum.reduce(
+      tasks,
+      {
+        tasks_map,
+        processing_stack,
         sorted_tasks_list
+      },
+      fn task, {tasks_map, processing_stack, sorted_tasks_list} ->
+        # Skip tasks that are already sorted
+        if task in sorted_tasks_list do
+          {tasks_map, processing_stack, sorted_tasks_list}
+        else
+          resolve_tasks(tasks, tasks_map, task, processing_stack, sorted_tasks_list)
+        end
+      end
+    )
+    # Extract the sorted list after all tasks are resolved
+    |> elem(2)
+  end
 
+  # Resolve the unsorted tasks
+  defp resolve_tasks(
+         tasks_list,
+         tasks_map,
+         task,
+         processing_stack,
+         sorted_tasks_list
+       ) do
+    cond do
+      # If the task has already been sorted, skip it
+      task in sorted_tasks_list ->
+        {tasks_map, processing_stack, sorted_tasks_list}
+
+      # If the task has no dependencies, add it to the sorted list
       task.requires == [] ->
-        sorted_tasks_list ++ [task]
+        {tasks_map, processing_stack, sorted_tasks_list ++ [task]}
 
-      !is_nil(parent_task_name) and parent_task_name in task.requires ->
+      # If the task is already in the processing stack,
+      # Raise a circular dependency error with the name of the tasks in the stack
+      task.name in processing_stack ->
         raise CircularDependencyError,
-          message:
-            "Circular dependency detected: between #{inspect(parent_task_name)} and #{inspect(task.name)}."
+          message: "Circular dependency detected: between #{Enum.join(processing_stack, ", ")}."
 
+      # If the task has dependencies, resolve them first
       true ->
-        resolved_tasks_list =
-          resolve_required_tasks(tasks_list, task.requires, sorted_tasks_list, task.name)
+        # Add the current task to the processing stack to detect circular dependencies
+        processing_stack = processing_stack ++ [task.name]
 
-        resolved_tasks_list ++ [task]
+        {tasks_map, processing_stack, resolved_tasks_list} =
+          resolve_task_dependencies(
+            tasks_list,
+            tasks_map,
+            task.requires,
+            processing_stack,
+            sorted_tasks_list
+          )
+
+        # Remove the current task from the processing stack since it is resolved
+        {tasks_map, List.delete(processing_stack, task.name), resolved_tasks_list ++ [task]}
     end
   end
 
-  defp resolve_required_tasks(tasks_list, requires, sorted_tasks_list, task_name) do
-    Enum.reduce(requires, sorted_tasks_list, fn required_task_name, acc ->
-      required_task = Enum.find(tasks_list, &(&1.name == required_task_name))
-      resolve_dependencies(tasks_list, required_task, acc, task_name)
-    end)
+  # Resolve the task's required dependencies tasks
+  defp resolve_task_dependencies(
+         tasks_list,
+         tasks_map,
+         requires,
+         processing_stack,
+         sorted_tasks_list
+       ) do
+    Enum.reduce(
+      requires,
+      {tasks_map, processing_stack, sorted_tasks_list},
+      fn required_task_name, {tasks_map, processing_stack, sorted_tasks_list} ->
+        # Get the required task from the task map
+        required_task = Map.get(tasks_map, required_task_name)
+
+        resolve_tasks(
+          tasks_list,
+          tasks_map,
+          required_task,
+          processing_stack,
+          sorted_tasks_list
+        )
+      end
+    )
   end
 end
