@@ -83,7 +83,7 @@ Example request body:
 
 #### Response
 
-If the request is successful, the API will return a JSON object containing the sorted list of items based on their names.
+If the request is successful, the API will return a JSON object containing the sorted list of tasks based on their execution order.
 
 Example response body:
 
@@ -104,7 +104,8 @@ Example response body:
 
 #### Additional Query Parameter
 
-If you pass the query parameter `format=bash` in the request, the API will return a bash script representation of sorted commands.
+By default, API return a JSON object containing the sorted list of tasks based on their execution order.
+But if you pass the query parameter `format=bash` in the request URL, the API will return a bash script representation of sorted commands.
 
 Example request with the query parameter:
 
@@ -117,9 +118,14 @@ Example response (plain text):
 ```bash
 #!/usr/bin/env bash
 
-
 touch /tmp/file1
 cat /tmp/file1
+```
+
+With this kind of response, you can run the commands directly from shell, like:
+
+```bash
+curl -H "Content-Type: application/json" http://{server-ip-address}:4000/api/tasks\?format\=bash -d @mytasks.json | bash
 ```
 
 This addition gives a clear explanation of how to use the `/api/todo` endpoint, including request format, response format, and an example of how to call it using cURL. Let me know if you need any further adjustments!
