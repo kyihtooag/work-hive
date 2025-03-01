@@ -22,8 +22,13 @@ defmodule WorkHiveWeb.TaskController do
   defp generate_bash_script(sorted_tasks) do
     header = "#!/usr/bin/env bash\n\n"
 
-    Enum.reduce(sorted_tasks, header, fn task, acc ->
-      acc <> task.command <> "\n"
-    end)
+    # Join the commands with a newline
+    script =
+      sorted_tasks
+      |> Enum.map(& &1.command)
+      |> Enum.join("\n")
+
+    # Combine the header with the script
+    header <> script
   end
 end
